@@ -1,5 +1,12 @@
 import numpy as np
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from game.board import create_data
+import time
+
 
 def write_boards(boards, filename):
     np.savez_compressed(filename, *boards)
@@ -23,8 +30,15 @@ def get_data_and_labels(xfile, yfile):
     return [data, labels]
 
 if __name__ == '__main__':
+    # Start the timer
+    start_time = time.time()
+
     create_dataset(3000)
     data, labels = get_data_and_labels('board_dataset.npz', 'labels.npz')
-    # print(data)
+    
+    # Stop the timer
+    end_time = time.time()
+    
+    print(f"Time: {start_time - end_time}")
     # print(labels)
 
