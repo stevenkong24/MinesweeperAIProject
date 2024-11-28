@@ -5,8 +5,14 @@ from tensorflow.keras.optimizers import Adam, SGD
 
 Sequential = tensorflow.keras.models.Sequential
 from sklearn.model_selection import train_test_split
-from data.data_io import get_data_and_labels
 
+import sys
+import os
+# sys.path.append(os.path.abspath('..'))
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# from data.data_io import get_data_and_labels
+# from data.data_io import get_data_and_labels
+from data.data_io import get_data_and_labels
 
 def build_model():
     x, y = 30, 16
@@ -29,7 +35,8 @@ def build_model():
 
     return model
 
-data, labels = get_data_and_labels('../data/board_dataset.npz', '../data/labels.npz')
+data, labels = get_data_and_labels('data/board_dataset.npz', 'data/labels.npz')
+# data, labels = get_data_and_labels('../data/board_dataset.npz', '../data/labels.npz')
 x, xtest, y, ytest = train_test_split(data, labels, test_size=0.2, train_size=0.8)
 
 model = build_model()
