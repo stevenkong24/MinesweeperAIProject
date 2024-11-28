@@ -75,13 +75,15 @@ def create_data(n, m, n_mines, amount):
         boards.append([grid, label_grid])
     return boards
 
+def get_dimensions(grid):
+    return(len(grid), len(grid[0])) 
 
 if __name__ == '__main__':
-    grid = generate(30, 16, 99)
+    grid = generate(30, 16, 20)
     cur_grid = generate_covered(30, 16)
     
     label_grid = create_label_grid(grid)
-    grid = random_coverage(grid)
+    # grid = random_coverage(grid)
     for r in grid:
         frmt = "{:>3}" * len(r)
         print(frmt.format(*r))
@@ -91,9 +93,28 @@ if __name__ == '__main__':
         frmt = "{:>3}" * len(r)
         print(frmt.format(*r))
     
-    cur_grid = game.revealSquare(cur_grid, grid, (0, 0))
-    print(cur_grid)
+    print()
+    x = 10
+    y = 5
+    cur_grid = game.reveal_square(x, y, cur_grid, grid)
     for r in cur_grid:
         frmt = "{:>3}" * len(r)
         print(frmt.format(*r))
+    #cur_grid = game.flagSquare(0, 5, cur_grid)
+    '''
+    while isinstance(cur_grid, list):
+        decision = input("R to reveal square, F to flag square: ")
+        coords = input("X, Y coordinates of desired square: ")
+        coords = tuple(map(int, coords.split(', ')))
+        x, y = coords
+        if (decision == 'R'):
+            cur_grid = game.reveal_square(x, y, cur_grid, grid)
+        elif (decision == 'F'):
+            cur_grid = game.flag_square(x, y, cur_grid, grid)
+        for r in cur_grid:
+            frmt = "{:>3}" * len(r)
+            print(frmt.format(*r))
+
+        print(str(game.mines_remaining(cur_grid)) + " mines remaining")
+    '''
     
