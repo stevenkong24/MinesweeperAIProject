@@ -1,7 +1,7 @@
 import random
 
 import numpy as np
-
+import game
 
 def surrounding_points(x, y):
     return [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1), (x + 1, y + 1), (x - 1, y - 1), (x + 1, y - 1),
@@ -36,6 +36,9 @@ def generate(n, m, n_mines):
                 grid[i][j] = surroundings.count(-1)
     return grid
 
+def generate_covered(n, m):
+    grid = [["#"] * m for _ in range(n)]
+    return grid
 
 def random_coverage(grid):
     for i in range(len(grid)):
@@ -75,8 +78,22 @@ def create_data(n, m, n_mines, amount):
 
 if __name__ == '__main__':
     grid = generate(30, 16, 99)
+    cur_grid = generate_covered(30, 16)
+    
     label_grid = create_label_grid(grid)
     grid = random_coverage(grid)
     for r in grid:
         frmt = "{:>3}" * len(r)
         print(frmt.format(*r))
+    
+    
+    for r in cur_grid:
+        frmt = "{:>3}" * len(r)
+        print(frmt.format(*r))
+    
+    cur_grid = game.revealSquare(cur_grid, grid, (0, 0))
+    print(cur_grid)
+    for r in cur_grid:
+        frmt = "{:>3}" * len(r)
+        print(frmt.format(*r))
+    
