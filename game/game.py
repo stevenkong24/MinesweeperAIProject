@@ -48,8 +48,9 @@ def clear_square(x, y, cur_grid, uncovered_grid):
         print(board.get_surroundings(x, y, cur_grid))
         for coord in board.surrounding_points(x, y):
             print(coord)
-            if x < size[0] and y < size[1]:
-                coord_x, coord_y = coord
+            coord_x, coord_y = coord
+            if coord_x < size[0] and coord_y < size[1]:
+                
                 if (cur_grid[coord_x][coord_y] != "!"):
                     cur_grid = reveal_square(coord_x, coord_y, cur_grid, uncovered_grid)
                     
@@ -69,3 +70,10 @@ def clear_square(x, y, cur_grid, uncovered_grid):
                         
         '''
     return cur_grid
+
+def check_if_correct(cur_grid, uncovered_grid):
+    for i in range(len(cur_grid)):
+        for j in range(len(cur_grid[0])):
+            if cur_grid[i][j] == "!" and uncovered_grid[i][j] != -1:
+                return False
+    return True
