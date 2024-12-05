@@ -1,3 +1,8 @@
+data/board_dataset100k.npz
+data/board_dataset300k.npz
+data/coverage_mask100k.npz
+data/labels100k.npz
+data/labels300k.npz
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
 # Byte-compiled / optimized / DLL files
