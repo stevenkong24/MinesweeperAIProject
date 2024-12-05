@@ -156,7 +156,7 @@ def random_coverage(grid):
     for i in range(len(grid)):
         for j in range(len(grid[0])):
             if grid[i][j] != MINE_CONST:
-                if random.randint(0, 5) in [1, 2, 3]:
+                if random.choice([1, 2]) == 1:
                     covered_grid = reveal_square(i, j, covered_grid, grid)
             else:
                 if random.randint(0, 5) in [1]:

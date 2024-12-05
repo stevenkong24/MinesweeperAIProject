@@ -46,7 +46,7 @@ if __name__ == '__main__':
     # Start the timer
     start_time = time.time()
 
-    create_dataset(100000)
+    create_dataset(300000)
     #data, labels = get_data_and_labels('board_dataset.npz', 'labels.npz', 'coverage_mask.npz')
     
     # Stop the timer
