@@ -39,6 +39,10 @@ def generate(n, m, n_mines):
             rect = pygame.Rect(10 + i * cell_size, 10 + j * cell_size, cell_size + 1, cell_size + 1)
             # pygame.draw.rect(screen, (211, 211, 211), rect)
             pygame.draw.rect(screen, (50, 50, 50), rect, 1)
+            
+            rect = pygame.Rect(770 + i * cell_size, 10 + j * cell_size, cell_size + 1, cell_size + 1)
+            # pygame.draw.rect(screen, (211, 211, 211), rect)
+            pygame.draw.rect(screen, (50, 50, 50), rect, 1)
             # pygame.draw.rect(screen, GRAY, rect, 1)  # Draw grid cell with a thin border
             
             if grid[i][j] != -1:
@@ -95,21 +99,27 @@ def update_board(cur_grid):
         for j in range(len(cur_grid[0])):
             
             rect = pygame.Rect(10 + i * cell_size, 10 + j * cell_size, cell_size + 1, cell_size + 1)
+            rect2 = pygame.Rect(770 + i * cell_size, 10 + j * cell_size, cell_size + 1, cell_size + 1)
             # pygame.draw.rect(screen, (211, 211, 211), rect)
             if (cur_grid[i][j] == '#'):
                 pygame.draw.rect(screen, (220, 220, 220), rect)
+                pygame.draw.rect(screen, (220, 220, 220), rect2)
             elif (cur_grid[i][j] == 0):
                 pygame.draw.rect(screen, (255, 255, 255), rect)
+                pygame.draw.rect(screen, (255, 255, 255), rect2)
             elif (cur_grid[i][j] == '!'):
-                pygame.draw.rect(screen, (255, 0, 0), rect)
+                pygame.draw.rect(screen, (220, 220, 220), rect)
+                pygame.draw.rect(screen, (220, 220, 220), rect2)
             else:
                 # Fix this
                 # screen.blit(my_font.render(str(game.mines_remaining(cur_grid, uncovered_grid)), False, (0, 0, 0)), (i * cell_size + 15, j * cell_size)) 
                 print(get_surroundings(i, j, uncovered_grid))
                 pygame.draw.rect(screen, (255, 255, 255), rect)
+                pygame.draw.rect(screen, (255, 255, 255), rect2)
                 screen.blit(my_font.render(str(get_surroundings(i, j, uncovered_grid).count(-1)), False, (0, 0, 0)), (i * cell_size + 15, j * cell_size))    
                 
             pygame.draw.rect(screen, (0, 0, 0), rect, 1)
+            pygame.draw.rect(screen, (0, 0, 0), rect2, 1)
             # pygame.draw.rect(screen, GRAY, rect, 1)  # Draw grid cell with a thin border
     pygame.display.flip()
 
@@ -117,10 +127,10 @@ def update_board(cur_grid):
 if __name__ == '__main__':
     rows = 16
     columns = 30
-    mines = 20
+    mines = 99
     height = 600
-    width = 1000
-    cell_size = (width - 200) / columns
+    width = 1600
+    cell_size = (width - 200) / (columns * 2)
     pygame.init()
     screen = pygame.display.set_mode((width, height))
     screen.fill((255, 255, 255))
@@ -134,7 +144,7 @@ if __name__ == '__main__':
     
     
     
-    screen.blit(my_font.render(str(game.mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)), ((columns + 1) * cell_size, 0))
+    screen.blit(my_font.render(str(game.mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)), ((columns - 4) * cell_size, (rows + 1) * cell_size))
     pygame.display.flip()
     
     for r in uncovered_grid:
@@ -202,11 +212,12 @@ if __name__ == '__main__':
 
                 print(str(game.mines_remaining(cur_grid, uncovered_grid)) + " mines remaining")
                 
-                rect = pygame.Rect(10 + columns * cell_size, 0, cell_size + 1, cell_size + 1)
+                rect = pygame.Rect(770 + columns * cell_size, 0, cell_size + 1, cell_size + 1)
                 # pygame.draw.rect(screen, (211, 211, 211), rect)
                 pygame.draw.rect(screen, (255, 255, 255), rect)
                 #pygame.display.update(pygame.Rect((columns + 1)* cell_size, 0, 100, 100))
-                screen.blit(my_font.render(str(game.mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)), ((columns + 1) * cell_size, 0))
+                screen.blit(my_font.render(str(game.mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)), ((columns - 4) * cell_size, (rows + 1) * cell_size))
+                # screen.blit(my_font.render(str(game.mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)), ((columns + 1) * cell_size, 0))
                 print()
                 if game.mines_remaining(cur_grid, uncovered_grid) == 0 and game.check_if_correct(cur_grid, uncovered_grid):
                     cur_grid = True
