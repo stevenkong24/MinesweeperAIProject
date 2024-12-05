@@ -21,18 +21,19 @@ def get_surroundings(x, y, grid):
 
 
 def generate(n, m, n_mines, coord):
-    coord_x, coord_y = coord
+    coord_y, coord_x = coord
     grid = [[0] * m for _ in range(n)]
     mines = set()
-    neighbours = surrounding_points(coord_x, coord_y)
+    neighbours = surrounding_points(coord_y, coord_x)
+    print(neighbours)
     while len(mines) < n_mines:
         y = random.randint(0, n - 1)
         x = random.randint(0, m - 1)
-        print(neighbours)
+        
         if (y, x) not in mines and (y, x) != coord and (y, x) not in neighbours:
             mines.add((y, x))
             grid[y][x] = -1
-    print(len(grid))
+    # print(len(grid))
     print(len(grid[0]))
     rect = pygame.Rect(10, 10, cell_size * columns, cell_size * rows)
     # pygame.draw.rect(screen, (211, 211, 211), rect)
