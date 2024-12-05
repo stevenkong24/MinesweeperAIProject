@@ -20,13 +20,16 @@ def get_surroundings(x, y, grid):
     return values
 
 
-def generate(n, m, n_mines):
+def generate(n, m, n_mines, coord):
+    coord_x, coord_y = coord
     grid = [[0] * m for _ in range(n)]
     mines = set()
+    neighbours = surrounding_points(coord_x, coord_y)
     while len(mines) < n_mines:
         y = random.randint(0, n - 1)
         x = random.randint(0, m - 1)
-        if (y, x) not in mines:
+        print(neighbours)
+        if (y, x) not in mines and (y, x) != coord and (y, x) not in neighbours:
             mines.add((y, x))
             grid[y][x] = -1
     print(len(grid))
@@ -94,6 +97,7 @@ def get_dimensions(grid):
     return(len(grid), len(grid[0])) 
 
 def update_board(cur_grid):
+    screen.fill((255, 255, 255))
     print(cur_grid)
     for i in range(len(cur_grid)):
         for j in range(len(cur_grid[0])):
@@ -108,8 +112,8 @@ def update_board(cur_grid):
                 pygame.draw.rect(screen, (255, 255, 255), rect)
                 pygame.draw.rect(screen, (255, 255, 255), rect2)
             elif (cur_grid[i][j] == '!'):
-                pygame.draw.rect(screen, (220, 220, 220), rect)
-                pygame.draw.rect(screen, (220, 220, 220), rect2)
+                pygame.draw.rect(screen, (220, 0, 0), rect)
+                pygame.draw.rect(screen, (220, 0, 0), rect2)
             else:
                 # Fix this
                 # screen.blit(my_font.render(str(game.mines_remaining(cur_grid, uncovered_grid)), False, (0, 0, 0)), (i * cell_size + 15, j * cell_size)) 
@@ -137,12 +141,24 @@ if __name__ == '__main__':
     pygame.font.init() 
     my_font = pygame.font.SysFont('Comic Sans MS', 30)
     
-    uncovered_grid = generate(columns, rows, mines)
-    cur_grid = generate_covered(columns, rows)
-    label_grid = create_label_grid(uncovered_grid)
+    generate_grid = True
     # grid = random_coverage(grid)
+    grid = generate_covered(columns, rows)
+    print(len(grid))
+    print(len(grid[0]))
     
-    
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            
+            rect = pygame.Rect(10 + i * cell_size, 10 + j * cell_size, cell_size + 1, cell_size + 1)
+            rect2 = pygame.Rect(770 + i * cell_size, 10 + j * cell_size, cell_size + 1, cell_size + 1)
+            pygame.draw.rect(screen, (220, 220, 220), rect)
+            pygame.draw.rect(screen, (220, 220, 220), rect2)
+            pygame.draw.rect(screen, (0, 0, 0), rect, 1)
+            pygame.draw.rect(screen, (0, 0, 0), rect2, 1)
+            # pygame.draw.rect(screen, GRAY, rect, 1)  # Draw grid cell with a thin border
+    pygame.display.flip()
+    '''
     
     screen.blit(my_font.render(str(game.mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)), ((columns - 4) * cell_size, (rows + 1) * cell_size))
     pygame.display.flip()
@@ -168,7 +184,8 @@ if __name__ == '__main__':
     y = 5
     # cur_grid = game.reveal_square(x, y, cur_grid, grid)
     #cur_grid = game.flagSquare(0, 5, cur_grid)
-    
+    '''
+    cur_grid = []
     while isinstance(cur_grid, list):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -183,6 +200,11 @@ if __name__ == '__main__':
                     break
                 
                 if event.button == 1:
+                    if generate_grid:
+                        uncovered_grid = generate(columns, rows, mines, (col, row))
+                        cur_grid = generate_covered(columns, rows)
+                        label_grid = create_label_grid(uncovered_grid)
+                        generate_grid = False
                     if cur_grid[col][row] == '#':
                         cur_grid = game.reveal_square(col, row, cur_grid, uncovered_grid)
                     else:
