@@ -1,8 +1,108 @@
 import random
 
 import numpy as np
-import game
 import pygame
+
+
+def reveal_square(x, y, cur_grid, uncovered_grid):
+    size = get_dimensions(cur_grid)
+    if (uncovered_grid[x][y] == -1):
+        # return false if lose
+        return False
+    elif (uncovered_grid[x][y] > 0):
+        cur_grid[x][y] = uncovered_grid[x][y]
+        return cur_grid
+
+    else:
+        cur_grid[x][y] = uncovered_grid[x][y]
+        toSearch = [(x, y)]
+        while (toSearch):
+            x, y = toSearch.pop(0)
+            if (0 in get_surroundings(x, y, uncovered_grid)):
+                for coord in surrounding_points(x, y):
+                    x, y = coord
+                    # print(x)
+                    # print(y)
+                    # if x < size[0] and y < size[1] and uncovered_grid[x][y] == 0 and cur_grid[x][y] == "#":
+                    if x < size[0] and y < size[1] and uncovered_grid[x][y] != -1 and cur_grid[x][
+                        y] == "#" and 0 in get_surroundings(x, y, uncovered_grid):
+                        cur_grid[x][y] = uncovered_grid[x][y]
+                        toSearch.append((x, y))
+
+        return cur_grid
+        # print(board.get_surroundings(x, y, uncovered_grid))
+
+
+def flag_square(x, y, cur_grid):
+    if isinstance(cur_grid[x][y], str) and cur_grid[x][y] == "#":
+        cur_grid[x][y] = "!"
+    elif isinstance(cur_grid[x][y], str) and cur_grid[x][y] == "!":
+        cur_grid[x][y] = "#"
+    return cur_grid
+
+
+def mines_remaining(cur_grid, uncovered_grid):
+    return sum(element == -1 for row in uncovered_grid for element in row) - sum(
+        element == '!' for row in cur_grid for element in row)
+
+
+def clear_square(x, y, cur_grid, uncovered_grid):
+    # Error here
+    if (get_surroundings(x, y, cur_grid).count("!") == cur_grid[x][y]):
+        # use surrounding points instead
+        size = get_dimensions(cur_grid)
+
+        print(get_surroundings(x, y, cur_grid))
+        for coord in surrounding_points(x, y):
+            print(coord)
+            coord_x, coord_y = coord
+            if coord_x < size[0] and coord_y < size[1]:
+
+                if (cur_grid[coord_x][coord_y] != "!"):
+                    cur_grid = reveal_square(coord_x, coord_y, cur_grid, uncovered_grid)
+
+                    if not cur_grid:
+                        return False
+
+        '''
+        if (0 in board.get_surroundings(x, y, uncovered_grid)):
+                for coord in board.surrounding_points(x, y):
+                    x, y = coord
+                    # print(x)
+                    # print(y)
+                    # if x < size[0] and y < size[1] and uncovered_grid[x][y] == 0 and cur_grid[x][y] == "#":
+                    if x < size[0] and y < size[1] and uncovered_grid[x][y] != -1 and cur_grid[x][y] == "#" and 0 in board.get_surroundings(x, y, uncovered_grid):
+                        cur_grid[x][y] = uncovered_grid[x][y]
+                        toSearch.append((x, y))
+
+        '''
+    return cur_grid
+
+
+def check_if_correct(cur_grid, uncovered_grid):
+    for i in range(len(cur_grid)):
+        for j in range(len(cur_grid[0])):
+            if cur_grid[i][j] == "!" and uncovered_grid[i][j] != -1:
+                return False
+    return True
+
+MINE_CONST = 100
+COVERED_CONST = -1
+def generateForData(n, m, n_mines):
+    grid = [[0] * m for _ in range(n)]
+    mines = set()
+    while len(mines) < n_mines:
+        y = random.randint(0, n - 1)
+        x = random.randint(0, m - 1)
+        if (y, x) not in mines:
+            mines.add((y, x))
+            grid[y][x] = MINE_CONST #-1
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            if grid[i][j] != MINE_CONST:
+                surroundings = get_surroundings(i, j, grid)
+                grid[i][j] = surroundings.count(MINE_CONST)
+    return grid
 
 def surrounding_points(x, y):
     return [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1), (x + 1, y + 1), (x - 1, y - 1), (x + 1, y - 1),
@@ -56,39 +156,81 @@ def generate_covered(n, m):
     return grid
 
 def random_coverage(grid):
+    covered_grid = generate_covered(len(grid), len(grid[0]))
     for i in range(len(grid)):
         for j in range(len(grid[0])):
-            if random.randint(0, 2) == 1:
-                grid[i][j] = -2
-    return grid
+            if grid[i][j] != MINE_CONST:
+                if random.choice([1, 2]) == 1:
+                    covered_grid = reveal_square(i, j, covered_grid, grid)
+            else:
+                if random.randint(0, 5) in [1]:
+                    covered_grid[i][j] = MINE_CONST
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            if covered_grid[i][j] == '#':
+                covered_grid[i][j] = COVERED_CONST
+    return covered_grid
 
 
 def create_label_grid(grid):
     label_grid = [[0] * len(grid[0]) for _ in range(len(grid))]
     for i in range(len(grid)):
         for j in range(len(grid[0])):
-            if grid[i][j] == -1:
+            if grid[i][j] == MINE_CONST:
                 label_grid[i][j] = 1
     return label_grid
 
+def create_coverage_mask(covered_grid):
+    new_covered_grid = covered_grid.copy()
+    for i in range(len(covered_grid)):
+        for j in range(len(covered_grid[0])):
+            if covered_grid[i][j] == COVERED_CONST:
+                new_covered_grid[i][j] = 1
+            else:
+                new_covered_grid[i][j] = 0
+    return new_covered_grid
 
 def create_data(n, m, n_mines, amount):
     boards = []
     for i in range(amount):
         print(f'generated data point {i+1}/{amount}')
-        grid = generate(n, m, n_mines)
+        grid = generateForData(n, m, n_mines)
+        # for r in grid:
+        #     frmt = "{:>3}" * len(r)
+        #     print(frmt.format(*r))
+        # print('\n-----------------------------------------\n')
         label_grid = create_label_grid(grid)
         grid = random_coverage(grid)
-
+        # for r in grid:
+        #     frmt = "{:>3}" * len(r)
+        #     print(frmt.format(*r))
+        # print('\n-----------------------------------------\n')
+        coverage_map = create_coverage_mask(grid)
+        # for r in coverage_map:
+        #     frmt = "{:>3}" * len(r)
+        #     print(frmt.format(*r))
+        # print('\n-----------------------------------------\n')
         grid = np.array(grid)
         grid = np.expand_dims(grid, axis=-1)
         grid = np.expand_dims(grid, axis=-0)
+        #print(grid)
         label_grid = np.array(label_grid)
         label_grid = np.expand_dims(label_grid, axis=-1)
         label_grid = np.expand_dims(label_grid, axis=-0)
+        #print(label_grid)
+        coverage_map= np.array(coverage_map)
+        coverage_map = np.expand_dims(coverage_map, axis=-1)
+        coverage_map = np.expand_dims(coverage_map, axis=-0)
+        #print(coverage_map)
 
-        boards.append([grid, label_grid])
+        boards.append([grid, label_grid, coverage_map])
     return boards
+
+def set_dimensions(matrix):
+    matrix = np.array(matrix)
+    matrix = np.expand_dims(matrix, axis=-1)
+    matrix = np.expand_dims(matrix, axis=-0)
+    return matrix
 
 def get_dimensions(grid):
     return(len(grid), len(grid[0])) 
@@ -142,9 +284,8 @@ if __name__ == '__main__':
     label_grid = create_label_grid(uncovered_grid)
     # grid = random_coverage(grid)
     
-    
-    
-    screen.blit(my_font.render(str(game.mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)), ((columns - 4) * cell_size, (rows + 1) * cell_size))
+
+    screen.blit(my_font.render(str(mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)), ((columns - 4) * cell_size, (rows + 1) * cell_size))
     pygame.display.flip()
     
     for r in uncovered_grid:
@@ -184,12 +325,12 @@ if __name__ == '__main__':
                 
                 if event.button == 1:
                     if cur_grid[col][row] == '#':
-                        cur_grid = game.reveal_square(col, row, cur_grid, uncovered_grid)
+                        cur_grid = reveal_square(col, row, cur_grid, uncovered_grid)
                     else:
-                        cur_grid = game.clear_square(col, row, cur_grid, uncovered_grid)
+                        cur_grid = clear_square(col, row, cur_grid, uncovered_grid)
 
                 elif event.button == 3:
-                    cur_grid = game.flag_square(col, row, cur_grid)
+                    cur_grid = flag_square(col, row, cur_grid)
                
                 
                 if cur_grid == False:
@@ -210,16 +351,16 @@ if __name__ == '__main__':
                         print(str(count) + frmt.format(*r))
                     count += 1
 
-                print(str(game.mines_remaining(cur_grid, uncovered_grid)) + " mines remaining")
+                print(str(mines_remaining(cur_grid, uncovered_grid)) + " mines remaining")
                 
                 rect = pygame.Rect(770 + columns * cell_size, 0, cell_size + 1, cell_size + 1)
                 # pygame.draw.rect(screen, (211, 211, 211), rect)
                 pygame.draw.rect(screen, (255, 255, 255), rect)
                 #pygame.display.update(pygame.Rect((columns + 1)* cell_size, 0, 100, 100))
-                screen.blit(my_font.render(str(game.mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)), ((columns - 4) * cell_size, (rows + 1) * cell_size))
+                screen.blit(my_font.render(str(mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)), ((columns - 4) * cell_size, (rows + 1) * cell_size))
                 # screen.blit(my_font.render(str(game.mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)), ((columns + 1) * cell_size, 0))
                 print()
-                if game.mines_remaining(cur_grid, uncovered_grid) == 0 and game.check_if_correct(cur_grid, uncovered_grid):
+                if mines_remaining(cur_grid, uncovered_grid) == 0 and check_if_correct(cur_grid, uncovered_grid):
                     cur_grid = True
                     break
                 # screen.fill((0, 0, 255))
