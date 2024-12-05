@@ -6,33 +6,36 @@ import pygame
 import tensorflow
 
 
-def reveal_square(x, y, cur_grid, uncovered_grid):
+def reveal_square(y, x, cur_grid, uncovered_grid):
     size = get_dimensions(cur_grid)
-    if (uncovered_grid[x][y] == -1):
+    if (uncovered_grid[y][x] == -1):
         # return false if lose
         return False
-    elif (uncovered_grid[x][y] > 0):
-        cur_grid[x][y] = uncovered_grid[x][y]
+    elif (uncovered_grid[y][x] > 0):
+        cur_grid[y][x] = uncovered_grid[y][x]
         return cur_grid
 
     else:
-        cur_grid[x][y] = uncovered_grid[x][y]
-        toSearch = [(x, y)]
+        cur_grid[y][x] = uncovered_grid[y][x]
+        toSearch = [(y, x)]
         while (toSearch):
-            x, y = toSearch.pop(0)
-            if (0 in get_surroundings(x, y, uncovered_grid)):
-                for coord in surrounding_points(x, y):
-                    x, y = coord
+            y, x = toSearch.pop(0)
+            # if (uncovered_grid[y][x])
+            
+            if (0 in get_surroundings(y, x, uncovered_grid)):
+                for coord in surrounding_points(y, x):
+                    
+                    new_y, new_x = coord
                     # print(x)
                     # print(y)
                     # if x < size[0] and y < size[1] and uncovered_grid[x][y] == 0 and cur_grid[x][y] == "#":
-                    if x < size[0] and y < size[1] and uncovered_grid[x][y] != -1 and cur_grid[x][
-                        y] == "#" and 0 in get_surroundings(x, y, uncovered_grid):
-                        cur_grid[x][y] = uncovered_grid[x][y]
-                        toSearch.append((x, y))
+                    if new_y < size[0] and new_x < size[1] and uncovered_grid[new_y][new_x] != -1 and cur_grid[new_y][new_x] == "#":
+                        cur_grid[new_y][new_x] = uncovered_grid[new_y][new_x]
+                        if (uncovered_grid[new_y][new_x] == 0):
+                            toSearch.append((new_y, new_x))                
 
         return cur_grid
-        # print(board.get_surroundings(x, y, uncovered_grid))
+
 
 
 def flag_square(x, y, cur_grid):
@@ -126,15 +129,18 @@ def get_surroundings(x, y, grid):
     return values
 
 
-def generate(n, m, n_mines):
+def generate(n, m, n_mines, coord):
+    coord_y, coord_x = coord
     grid = [[0] * m for _ in range(n)]
     mines = set()
+    neighbours = surrounding_points(coord_y, coord_x)
     while len(mines) < n_mines:
         y = random.randint(0, n - 1)
         x = random.randint(0, m - 1)
-        if (y, x) not in mines:
+        if (y, x) not in mines and (y, x) != coord and (y, x) not in neighbours:
             mines.add((y, x))
             grid[y][x] = -1
+            
     print(len(grid))
     print(len(grid[0]))
     rect = pygame.Rect(10, 10, cell_size * columns, cell_size * rows)
@@ -302,23 +308,34 @@ if __name__ == '__main__':
     height = 600
     width = 1600
     cell_size = (width - 200) / (columns * 2)
+    generate_grid = True
+    grid = generate_covered(columns, rows)
+    
     pygame.init()
     screen = pygame.display.set_mode((width, height))
     screen.fill((255, 255, 255))
     pygame.font.init()
     my_font = pygame.font.SysFont('Comic Sans MS', 30)
 
-    model = tensorflow.keras.models.load_model("../bestsofar.keras")
+    model = tensorflow.keras.models.load_model("./bestsofar.keras")
 
-    uncovered_grid = generate(columns, rows, mines)
-    cur_grid = generate_covered(columns, rows)
-    label_grid = create_label_grid(uncovered_grid)
+    # uncovered_grid = generate(columns, rows, mines)
+    # cur_grid = generate_covered(columns, rows)
+    # label_grid = create_label_grid(uncovered_grid)
     # grid = random_coverage(grid)
 
-    screen.blit(my_font.render(str(mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)),
-                ((columns - 4) * cell_size, (rows + 1) * cell_size))
-    pygame.display.flip()
+    # screen.blit(my_font.render(str(mines_remaining(cur_grid, uncovered_grid)) + " left", False, (0, 0, 0)), ((columns - 4) * cell_size, (rows + 1) * cell_size))
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
 
+            rect = pygame.Rect(10 + i * cell_size, 10 + j * cell_size, cell_size + 1, cell_size + 1)
+            rect2 = pygame.Rect(770 + i * cell_size, 10 + j * cell_size, cell_size + 1, cell_size + 1)
+            pygame.draw.rect(screen, (220, 220, 220), rect)
+            pygame.draw.rect(screen, (220, 220, 220), rect2)
+            pygame.draw.rect(screen, (0, 0, 0), rect, 1)
+            pygame.draw.rect(screen, (0, 0, 0), rect2, 1)
+    pygame.display.flip()
+    '''
     for r in uncovered_grid:
         frmt = "{:>3}" * len(r)
         print(frmt.format(*r))
@@ -340,7 +357,8 @@ if __name__ == '__main__':
     y = 5
     # cur_grid = game.reveal_square(x, y, cur_grid, grid)
     # cur_grid = game.flagSquare(0, 5, cur_grid)
-
+    '''
+    cur_grid = []
     while isinstance(cur_grid, list):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -355,6 +373,12 @@ if __name__ == '__main__':
                     break
 
                 if event.button == 1:
+                    if generate_grid:
+                        uncovered_grid = generate(columns, rows, mines, (col, row))
+                        cur_grid = generate_covered(columns, rows)
+                        label_grid = create_label_grid(uncovered_grid)
+                        generate_grid = False
+                        
                     if cur_grid[col][row] == '#':
                         cur_grid = reveal_square(col, row, cur_grid, uncovered_grid)
                     else:
