@@ -2,3 +2,4 @@ pygame
 numpy
 tensorflow
 scikit-learn
+matplotlib
