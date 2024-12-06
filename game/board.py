@@ -260,7 +260,7 @@ def disp_grid_to_model_grid(cur_grid):
             if (cur_grid[i][j] == '#'):
                 grid[i][j] = -1
             elif (cur_grid[i][j] == '!'):
-                grid = 100
+                grid[i][j] = 100
             else:
                 grid[i][j] = int(cur_grid[i][j])
     return grid
@@ -282,7 +282,7 @@ def update_board(cur_grid, model):
                 pygame.draw.rect(screen, (220*ans[i][j], 0, 0), rect2)
             elif (cur_grid[i][j] == 0):
                 pygame.draw.rect(screen, (255, 255, 255), rect)
-                pygame.draw.rect(screen, (255, 255, 255), rect2)# (220*ans[i][j], 0, 0), rect2)
+                pygame.draw.rect(screen, (255, 255, 255), rect2)
             elif (cur_grid[i][j] == '!'):
                 pygame.draw.rect(screen, (220, 220, 220), rect)
                 pygame.draw.rect(screen, (220*ans[i][j], 0, 0), rect2)
@@ -317,7 +317,7 @@ if __name__ == '__main__':
     pygame.font.init()
     my_font = pygame.font.SysFont('Comic Sans MS', 30)
 
-    model = tensorflow.keras.models.load_model("./bestsofar.keras")
+    model = tensorflow.keras.models.load_model("../bestsofar.keras")
 
     # uncovered_grid = generate(columns, rows, mines)
     # cur_grid = generate_covered(columns, rows)
