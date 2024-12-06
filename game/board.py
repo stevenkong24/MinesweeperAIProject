@@ -29,7 +29,7 @@ def reveal_square(y, x, cur_grid, uncovered_grid):
                 # print(x)
                 # print(y)
                 # if x < size[0] and y < size[1] and uncovered_grid[x][y] == 0 and cur_grid[x][y] == "#":
-                if new_y < size[0] and new_x < size[1] and uncovered_grid[new_y][new_x] != -1 and cur_grid[new_y][new_x] == "#":
+                if new_y < size[0] and new_y >= 0 and new_x < size[1] and new_x >= 0 and uncovered_grid[new_y][new_x] != -1 and cur_grid[new_y][new_x] == "#":
                     cur_grid[new_y][new_x] = uncovered_grid[new_y][new_x]
                     if (uncovered_grid[new_y][new_x] == 0):
                         toSearch.append((new_y, new_x))                
@@ -267,10 +267,13 @@ def disp_grid_to_model_grid(cur_grid):
 
 def update_board(cur_grid, model):
     print(cur_grid)
+    size = get_dimensions(cur_grid)
     mgrid = disp_grid_to_model_grid(cur_grid)
     mgrid = set_dimensions(mgrid)
     ans = model.predict(mgrid)
     ans = [[round(float(val), 2) for val in row] for row in ans.squeeze()]
+    safe = set()
+    mine = set()
     for i in range(len(cur_grid)):
         for j in range(len(cur_grid[0])):
 
@@ -280,16 +283,41 @@ def update_board(cur_grid, model):
             if (cur_grid[i][j] == '#'):
                 pygame.draw.rect(screen, (220, 220, 220), rect)
                 pygame.draw.rect(screen, (220*ans[i][j], 0, 0), rect2)
+                '''
+                for coord in surrounding_points(i, j):
+                    
+                    new_y, new_x = coord
+                    if new_y < get_dimensions(cur_grid)[0] and new_x < get_dimensions(cur_grid)[1]:
+                        print()
+                
+                if (get_surroundings(i, j, cur_grid).count("!") == get_surroundings(i, j, uncovered_grid).count(-1)):
+                    pygame.draw.rect(screen, (0, 0, 0), rect2)
+                # elif (get_surroundings(i, j, cur_grid).count("#") - get_surroundings(i, j, cur_grid).count("!") == uncovered_grid[i][j]):
+                #     pygame.draw.rect(screen, (220, 0, 0), rect2)
+                '''
             elif (cur_grid[i][j] == 0):
                 pygame.draw.rect(screen, (255, 255, 255), rect)
                 pygame.draw.rect(screen, (255, 255, 255), rect2)
             elif (cur_grid[i][j] == '!'):
-                pygame.draw.rect(screen, (220, 220, 220), rect)
+                pygame.draw.rect(screen, (220, 0, 0), rect)
                 pygame.draw.rect(screen, (220*ans[i][j], 0, 0), rect2)
             else:
-                # Fix this
                 # screen.blit(my_font.render(str(game.mines_remaining(cur_grid, uncovered_grid)), False, (0, 0, 0)), (i * cell_size + 15, j * cell_size))
-                print(get_surroundings(i, j, uncovered_grid))
+                if (get_surroundings(i, j, cur_grid).count("!") == cur_grid[i][j]):
+                    for coord in surrounding_points(i, j):
+                        coord_y, coord_x = coord
+                        if coord_y < size[0] and coord_y >= 0 and coord_x < size[1] and coord_x >= 0 and cur_grid[coord_y][coord_x] == '#' and (coord_y, coord_x) not in safe:
+                            safe.add((coord_y, coord_x))
+                            
+                elif (get_surroundings(i, j, cur_grid).count("#") + get_surroundings(i, j, cur_grid).count("!") == cur_grid[i][j]):
+                    for coord in surrounding_points(i, j):
+                        coord_y, coord_x = coord
+                        # new_y < size[0] and new_y >= 0 and new_x < size[1] and new_x >= 0
+                        if coord_y < size[0] and coord_y >= 0 and coord_x < size[1] and coord_x >= 0 and cur_grid[coord_y][coord_x] == '#' and (coord_y, coord_x) not in mine:
+                            mine.add((coord_y, coord_x))
+                # elif (get_surroundings(i, j, cur_grid).count("#") - get_surroundings(i, j, cur_grid).count("!") == uncovered_grid[i][j]):
+                #     pygame.draw.rect(screen, (220, 0, 0), rect2)
+                            
                 pygame.draw.rect(screen, (255, 255, 255), rect)
                 pygame.draw.rect(screen, (255, 255, 255), rect2)
                 screen.blit(my_font.render(str(get_surroundings(i, j, uncovered_grid).count(-1)), False, (0, 0, 0)),
@@ -298,6 +326,18 @@ def update_board(cur_grid, model):
             pygame.draw.rect(screen, (0, 0, 0), rect, 1)
             pygame.draw.rect(screen, (0, 0, 0), rect2, 1)
             # pygame.draw.rect(screen, GRAY, rect, 1)  # Draw grid cell with a thin border
+    for coord in safe:
+        i, j = coord
+        rect2 = pygame.Rect(770 + i * cell_size, 10 + j * cell_size, cell_size + 1, cell_size + 1)
+        pygame.draw.rect(screen, (255, 255, 255), rect2)
+        pygame.draw.rect(screen, (0, 0, 0), rect2, 1)
+        
+    for coord in mine:
+        i, j = coord
+        rect2 = pygame.Rect(770 + i * cell_size, 10 + j * cell_size, cell_size + 1, cell_size + 1)
+        pygame.draw.rect(screen, (220, 0, 0), rect2)
+        pygame.draw.rect(screen, (0, 0, 0), rect2, 1)
+        
     pygame.display.flip()
 
 
@@ -317,7 +357,7 @@ if __name__ == '__main__':
     pygame.font.init()
     my_font = pygame.font.SysFont('Comic Sans MS', 30)
 
-    model = tensorflow.keras.models.load_model("../bestsofar.keras")
+    model = tensorflow.keras.models.load_model("bestsofarcomplex.keras")
 
     # uncovered_grid = generate(columns, rows, mines)
     # cur_grid = generate_covered(columns, rows)
