@@ -22,17 +22,17 @@ def reveal_square(y, x, cur_grid, uncovered_grid):
             y, x = toSearch.pop(0)
             # if (uncovered_grid[y][x])
             
-            if (0 in get_surroundings(y, x, uncovered_grid)):
-                for coord in surrounding_points(y, x):
+            #if (0 in get_surroundings(y, x, uncovered_grid)):
+            for coord in surrounding_points(y, x):
                     
-                    new_y, new_x = coord
-                    # print(x)
-                    # print(y)
-                    # if x < size[0] and y < size[1] and uncovered_grid[x][y] == 0 and cur_grid[x][y] == "#":
-                    if new_y < size[0] and new_x < size[1] and uncovered_grid[new_y][new_x] != -1 and cur_grid[new_y][new_x] == "#":
-                        cur_grid[new_y][new_x] = uncovered_grid[new_y][new_x]
-                        if (uncovered_grid[new_y][new_x] == 0):
-                            toSearch.append((new_y, new_x))                
+                new_y, new_x = coord
+                # print(x)
+                # print(y)
+                # if x < size[0] and y < size[1] and uncovered_grid[x][y] == 0 and cur_grid[x][y] == "#":
+                if new_y < size[0] and new_x < size[1] and uncovered_grid[new_y][new_x] != -1 and cur_grid[new_y][new_x] == "#":
+                    cur_grid[new_y][new_x] = uncovered_grid[new_y][new_x]
+                    if (uncovered_grid[new_y][new_x] == 0):
+                        toSearch.append((new_y, new_x))                
 
         return cur_grid
 
