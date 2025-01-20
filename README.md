@@ -1,0 +1,1 @@
+A Minesweeper tool that helps users play in real time, showing them which squares are guaranteed to be safe or a mine using a rule-based system and the probability that every other square is a mine using a convolutional neural network
